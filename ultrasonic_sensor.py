@@ -3,21 +3,33 @@ import time
 
 # Measuring distance with the HC-SR04 Ultrasonic Sensor
 
-trig_pin = 6  # Pin to send the ping from
-echo_pin = 5  # Pin to read the ping from
-led_pin = 18  # Pin for LED (adjust as per your board setup)
-measurement_interval = 0.06  # Datasheet recommends waiting at least 60ms between measurements
-previous_time = 0
-previous_micros = 0
-led_state = False  # Initialise LED to off
-distance = 0
+#trig_pin = 6  # Pin to send the ping from
+#echo_pin = 5  # Pin to read the ping from
+#led_pin = 18  # Pin for LED (adjust as per your board setup)
+#measurement_interval = 0.06  # Datasheet recommends waiting at least 60ms between measurements
+#previous_time = 0
+#previous_micros = 0
+#led_state = False  # Initialise LED to off
+#distance = 0
 
 GPIO.setmode(GPIO.BCM)  # Set GPIO pin numbering
 GPIO.setup(trig_pin, GPIO.OUT)
 GPIO.setup(led_pin, GPIO.OUT)
 GPIO.setup(echo_pin, GPIO.IN)
 
-def calculate_distance():
+def uss_setup():
+    trig_pin = 6
+    echo_pin = 5
+    measurement_interval = 0.06
+    previous_time = 0
+    previous_micros = 0
+    distance = 0
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(trig_pin, GPIO.OUT)
+    GPIO.setup(echo_pin, GPIO.IN)
+    
+
+def uss_get_distance():
     global previous_time, led_state, distance
     current_time = time.time()
 
@@ -67,7 +79,7 @@ def setup():
 def loop():
     try:
         while True:
-            calculate_distance()
+            uss_get_distance()
             time.sleep(0.1)
     except KeyboardInterrupt:
         GPIO.cleanup()  # Reset GPIO settings on exit

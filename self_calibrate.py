@@ -2,12 +2,7 @@ import argparse
 import json
 import sys
 import time
-
 import pyrealsense2 as rs
-
-__desc__ = """
-Self-calibration with APIs
-"""
 
 # mappings
 occ_speed_map = {
