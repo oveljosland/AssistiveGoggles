@@ -4,6 +4,8 @@ import sys
 import time
 import pyrealsense2 as rs
 
+# add desc
+__desc__ = "Self-calibrate with APIs"
 # mappings
 occ_speed_map = {
     'very_fast': 0,
