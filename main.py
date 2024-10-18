@@ -3,6 +3,7 @@ import subprocess
 
 
 def main():
+    
     subprocess.run(["python", "self_calibrate.py"])
     subprocess.run(["python", "capture.py"])
 
