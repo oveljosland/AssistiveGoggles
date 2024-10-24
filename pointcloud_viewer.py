@@ -39,12 +39,8 @@ import numpy as np
 import pyrealsense2 as rs
 
 
-# https://stackoverflow.com/a/6802723
 def rotation_matrix(axis, theta):
-    """
-    Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians.
-    """
+    # rotasjon mot klokken i radianer https://stackoverflow.com/a/6802723
     axis = np.asarray(axis)
     axis = axis / math.sqrt(np.dot(axis, axis))
     a = math.cos(theta / 2.0)
@@ -77,34 +73,35 @@ class AppState:
 
     @property
     def rotation(self):
+        # rotasjon, egenskap
         Rx = rotation_matrix((1, 0, 0), math.radians(-self.pitch))
         Ry = rotation_matrix((0, 1, 0), math.radians(-self.yaw))
         return np.dot(Ry, Rx).astype(np.float32)
 
 state = AppState()
 
-# Configure streams
+# start pipeline, definer konfig
 pipeline = rs.pipeline()
 config = rs.config()
-
 pipeline_wrapper = rs.pipeline_wrapper(pipeline)
 pipeline_profile = config.resolve(pipeline_wrapper)
 device = pipeline_profile.get_device()
 
+# forsøk å finne kamera
 found_rgb = False
-for s in device.sensors:
-    if s.get_info(rs.camera_info.name) == 'RGB Camera':
+for sensor in device.sensors:
+    if sensor.get_info(rs.camera_info.name) == 'RGB Camera':
         found_rgb = True
         break
 if not found_rgb:
-    print("The demo requires Depth camera with Color sensor")
+    print("RGB kamera ikke funnet!")
     exit(0)
 
 config.enable_stream(rs.stream.depth, rs.format.z16, 30)
 other_stream, other_format = rs.stream.color, rs.format.rgb8
 config.enable_stream(other_stream, other_format, 30)
 
-# Start streaming
+# Start strømming med konfigen
 pipeline.start(config)
 profile = pipeline.get_active_profile()
 
@@ -112,18 +109,20 @@ depth_profile = rs.video_stream_profile(profile.get_stream(rs.stream.depth))
 depth_intrinsics = depth_profile.get_intrinsics()
 w, h = depth_intrinsics.width, depth_intrinsics.height
 
-# Processing blocks
+# prosessering, filter
 pc = rs.pointcloud()
 decimate = rs.decimation_filter()
 decimate.set_option(rs.option.filter_magnitude, 2 ** state.decimate)
 colorizer = rs.colorizer()
-filters = [rs.disparity_transform(),
-           rs.spatial_filter(),
-           rs.temporal_filter(),
-           rs.disparity_transform(False)]
+filters = [
+    rs.disparity_transform(),
+    rs.spatial_filter(),
+    rs.temporal_filter(),
+    rs.disparity_transform(False)]
 
 
-# pyglet
+
+# pyglet vindu
 window = pyglet.window.Window(
     config=gl.Config(
         double_buffer=True,
@@ -136,6 +135,7 @@ window.push_handlers(keys)
 
 def convert_fmt(fmt):
     """rs.format to pyglet format string"""
+    # 
     return {
         rs.format.rgb8: 'RGB',
         rs.format.bgr8: 'BGR',
