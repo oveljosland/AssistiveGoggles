@@ -1,35 +1,22 @@
 """
-OpenGL Pointcloud viewer with http://pyglet.org
+kontroller:
+p - pause
+r - reset rotasjon og zoom
+d - endre decimation filter
+z - point scaling av/på
+x - point distance attenuation av/på
+c - fargekilde: RGB eeller "avstand"
+l - belysning av/på
+f - dybde post-processing av/på
+s - lagre PNG
+e - eksporter punkter til ply
+q/escape - avslutt 
 
-Usage:
-------
-Mouse:
-    Drag with left button to rotate around pivot (thick small axes),
-    with right button to translate and the wheel to zoom.
 
-Keyboard:
-    [p]     Pause
-    [r]     Reset View
-    [d]     Cycle through decimation values
-    [z]     Toggle point scaling
-    [x]     Toggle point distance attenuation
-    [c]     Toggle color source
-    [l]     Toggle lighting
-    [f]     Toggle depth post-processing
-    [s]     Save PNG (./out.png)
-    [e]     Export points to ply (./out.ply)
-    [q/ESC] Quit
-
-Notes:
-------
-Using deprecated OpenGL (FFP lighting, matrix stack...) however, draw calls 
-are kept low with pyglet.graphics.* which uses glDrawArrays internally.
-
-Normals calculation is done with numpy on CPU which is rather slow, should really
-be done with shaders but was omitted for several reasons - brevity, for lowering
-dependencies (pyglet doesn't ship with shader support & recommends pyshaders)
-and for reference.
+NB:
+Bruker en gammel versjon av OpenGL og pyglet.
 """
+
 
 import math
 import ctypes
@@ -60,12 +47,12 @@ class AppState:
         self.distance = 2
         self.mouse_btns = [False, False, False]
         self.paused = False
-        self.decimate = 0
-        self.scale = True
+        self.decimate = 2
+        self.scale = False
         self.attenuation = False
-        self.color = True
+        self.color = False
         self.lighting = False
-        self.postprocessing = False
+        self.postprocessing = True
 
     def reset(self):
         self.pitch, self.yaw, self.distance = 0, 0, 2
@@ -73,7 +60,7 @@ class AppState:
 
     @property
     def rotation(self):
-        # rotasjon, egenskap
+        # rotasjon (figur)
         Rx = rotation_matrix((1, 0, 0), math.radians(-self.pitch))
         Ry = rotation_matrix((0, 1, 0), math.radians(-self.yaw))
         return np.dot(Ry, Rx).astype(np.float32)
@@ -97,9 +84,11 @@ if not found_rgb:
     print("RGB kamera ikke funnet!")
     exit(0)
 
-config.enable_stream(rs.stream.depth, rs.format.z16, 30)
+##################################### framerate osv. ######################
+framerate = 30
+config.enable_stream(rs.stream.depth, rs.format.z16, framerate)
 other_stream, other_format = rs.stream.color, rs.format.rgb8
-config.enable_stream(other_stream, other_format, 30)
+config.enable_stream(other_stream, other_format, framerate)
 
 # Start strømming med konfigen
 pipeline.start(config)
@@ -465,6 +454,8 @@ def run(dt):
         """copy numpy array to pyglet array"""
         # timeit was mostly inconclusive, favoring slice assignment for safety
         np.array(dst, copy=False)[:] = src.ravel()
+
+
         # ctypes.memmove(dst, src.ctypes.data, src.nbytes)
 
     copy(vertex_list.vertices, verts)
