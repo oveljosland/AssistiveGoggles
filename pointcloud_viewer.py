@@ -39,6 +39,11 @@ import numpy as np
 import pyrealsense2 as rs
 
 
+#TODO: implement this using the camera class
+#TODO: Give the class a more descriptive name
+#TODO: Move all program logic into functions
+
+
 # https://stackoverflow.com/a/6802723
 def rotation_matrix(axis, theta):
     """

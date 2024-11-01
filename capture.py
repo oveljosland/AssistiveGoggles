@@ -3,6 +3,9 @@ import numpy as np
 import cv2
 
 
+#TODO: implement this using the camera class
+#TODO: Move all program logic into functions
+
 # Configure depth and color streams
 pipeline = rs.pipeline()
 config = rs.config()
