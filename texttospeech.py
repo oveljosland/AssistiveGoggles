@@ -65,6 +65,8 @@ class TextToSpeech:
         self.engine.setProperty('volume', volume)
 
     def read_text(self, frame):
+        #TODO: Split into getting the text and reading it out loud
+        #TODO: Type hint the frame parameter
         client = vision.ImageAnnotatorClient()
 
         # Convert the frame to a byte array
@@ -93,6 +95,7 @@ class TextToSpeech:
             )
 
     def run_blocking(self, camera: Camera):
+        # TODO: Implement a non-blocking version of this method
         while True:
             color_image = np.asanyarray(camera.get_color_image().get_data())
             depth_image = np.asanyarray(camera.get_depth_image().get_data())
