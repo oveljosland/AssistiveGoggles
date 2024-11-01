@@ -1,9 +1,137 @@
+import pyrealsense2
 import pyrealsense2 as rs #kameramodul
 import numpy as np #gjør bilde til narray
 import cv2 #bildbehandling + vise bilder
 from google.cloud import vision #google vision api
 import pyttsx3 #snakking
 
+
+
+class Camera:
+    """Wrapper for the Intel RealSense camera."""
+    def __init__(self):
+        self.frame: pyrealsense2.composite_frame = None
+        self.color_image: pyrealsense2.depth_frame = None
+        self.depth_image: pyrealsense2.video_frame = None
+
+        self.pipeline = rs.pipeline()
+        self.config = rs.config()
+
+        self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+        self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+        self.pipeline.start(self.config)
+
+    def __del__(self):
+        self.pipeline.stop()
+
+    def try_get_next_image(self):
+        """Gets the next frame from the camera if it is available."""
+        frame: pyrealsense2.composite_frame = self.pipeline.poll_for_frames()
+
+        if frame:
+            self.frame = frame
+            self.depth_image = frame.get_depth_frame()
+            self.color_image = frame.get_color_frame()
+
+    def get_frame(self) -> pyrealsense2.composite_frame:
+        """Gets the most recent combined frame from the camera."""
+        self.try_get_next_image()
+
+        return self.frame
+
+    def get_color_image(self) -> pyrealsense2.depth_frame:
+        """Gets the most recent color image from the camera."""
+        self.try_get_next_image()
+
+        return self.color_image
+
+    def get_depth_image(self) -> pyrealsense2.video_frame:
+        """Gets the most recent depth image from the camera."""
+        self.try_get_next_image()
+
+        return self.depth_image
+
+
+class TextToSpeech:
+    def __init__(self, rate: int = 150, volume: float = 0.9):
+        # Initialize the pyttsx3 engine
+        self.engine = pyttsx3.init()
+
+        # Set the rate of speech
+        self.engine.setProperty('rate', rate)
+
+        # Set the volume
+        self.engine.setProperty('volume', volume)
+
+    def read_text(self, frame):
+        client = vision.ImageAnnotatorClient()
+
+        # Convert the frame to a byte array
+        _, encoded_image = cv2.imencode('.jpg', np.asanyarray(frame.get_data()))
+        content = encoded_image.tobytes()
+
+        # Create an Image object
+        image = vision.Image(content=content)
+
+        # Perform text detection
+        response = client.text_detection(image=image)
+        texts = response.text_annotations
+        print("Texts:")
+
+        # read out loud
+        for text in texts[1:]:  # Skipping the first result as it's the full text
+            print(f'\n"{text.description}"')
+            self.engine.say(text.description)
+            self.engine.runAndWait()
+
+        # Check for errors in the response
+        if response.error.message:
+            raise Exception(
+                "{}\nFor more info on error messages, check: "
+                "https://cloud.google.com/apis/design/errors".format(response.error.message)
+            )
+
+    def run_blocking(self, camera: Camera):
+        while True:
+            color_image = np.asanyarray(camera.get_color_image().get_data())
+            depth_image = np.asanyarray(camera.get_depth_image().get_data())
+
+            # listen for key press
+            key = cv2.waitKey(1)
+            if key == ord('r'):
+                # test = camera.get_color_image()
+                # read(test)
+                pass
+
+            # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
+            depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+
+            depth_colormap_dim = depth_colormap.shape
+            color_colormap_dim = color_image.shape
+
+            # If depth and color resolutions are different, resize color image to match depth image for display
+            if depth_colormap_dim != color_colormap_dim:
+                resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]),
+                                                 interpolation=cv2.INTER_AREA)
+                images = np.hstack((resized_color_image, depth_colormap))
+            else:
+                images = np.hstack((color_image, depth_colormap))
+
+            # Show images
+            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+            cv2.imshow('RealSense', images)
+            cv2.waitKey(1)
+
+
+if __name__ == "__main__":
+    camera = Camera()
+    tts = TextToSpeech()
+
+    tts.run_blocking(camera)
+
+
+"""
 # Initialize the pyttsx3 engine
 engine = pyttsx3.init()
 
@@ -108,3 +236,4 @@ finally:
 
     # Stop streaming
     pipeline.stop()
+"""
