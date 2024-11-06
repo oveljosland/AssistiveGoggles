@@ -10,6 +10,7 @@ import random
 def main():
     #setup
     #left_sensor.setup(), right_sensor.setup()
+    subprocess.run(["python", "self_calibrate.py"])
 
     try:
         while True:
@@ -21,7 +22,7 @@ def main():
             #print(f"[{headspace[0]}, {headspace[1]}] -> {avg_headspace} cm")
             #time.sleep(0.5)
             
-            subprocess.run(["python", "self_calibrate.py"])
+            
             subprocess.run(["python", "capture.py"])
 
     except KeyboardInterrupt:
