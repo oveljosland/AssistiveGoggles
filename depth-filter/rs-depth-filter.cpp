@@ -1,12 +1,12 @@
 // License: Apache 2.0. See LICENSE file in root directory.
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
 #include <librealsense2/rs_advanced_mode.hpp>
-#include <opencv2/opencv.hpp>   // Include OpenCV API
+#include <opencv4/opencv2/opencv.hpp>  // Include OpenCV API
 
 #include <fstream>
-// hei matti
+
 #include "tiny-profiler.h"
-#include "downsample.h"
+#include "downsample.h" 
 
 rs2_intrinsics operator/(const rs2_intrinsics& i, int f)
 {
