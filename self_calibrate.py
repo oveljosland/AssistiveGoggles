@@ -38,7 +38,7 @@ def main(arguments=None):
     args = parse_arguments(arguments)
 
     try:
-        device = ctx.query_devices()[0]
+        device: rs.device = ctx.query_devices()[0]
     except IndexError:
         print('Device is not connected')
         sys.exit(1)
@@ -63,8 +63,10 @@ def main(arguments=None):
     # Prepare device
     depth_sensor = device.first_depth_sensor()
     depth_sensor.set_option(rs.option.emitter_enabled, 0)
+
     if depth_sensor.supports(rs.option.thermal_compensation):
         depth_sensor.set_option(rs.option.thermal_compensation, 0)
+
     if args.exposure == 'auto':
         depth_sensor.set_option(rs.option.enable_auto_exposure, 1)
     else:
