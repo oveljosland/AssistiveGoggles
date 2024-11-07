@@ -21,5 +21,4 @@ To install the code, you will need to clone the repository to your Raspberry Pi.
 
 
 ## Running the code
-
-To run the code, simply clone the repository to your Raspberry Pi and run the main.py file.
+To run the code, simply run the main.py file.
