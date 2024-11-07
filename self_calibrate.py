@@ -4,8 +4,6 @@ import sys
 import time
 import pyrealsense2 as rs
 
-#TODO: implement this using the camera class
-
 # add desc
 __desc__ = "Self-calibrate with APIs"
 # mappings
@@ -32,7 +30,6 @@ fl_adjust_map = {
 }
 
 ctx = rs.context()
-
 
 def main(arguments=None):
     args = parse_arguments(arguments)

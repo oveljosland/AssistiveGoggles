@@ -1,10 +1,6 @@
-import pyrealsense2 as rs
 import numpy as np
 import cv2
 import realsense_camera
-
-#TODO: implement this using the camera class
-#TODO: Move all program logic into functions
 
 def main():
     camera = realsense_camera.PyRealSenseCamera()
