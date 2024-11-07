@@ -1,16 +1,13 @@
-// License: Apache 2.0. See LICENSE file in root directory.
-// Copyright(c) 2017 Intel Corporation. All Rights Reserved.
-
-#pragma once
+#ifndef CV_HELPERS_HPP
+#define CV_HELPERS_HPP
 
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
-#include <opencv4/opencv2/opencv.hpp>   // Include OpenCV API
+#include <opencv4/opencv2/opencv.hpp>  // Include OpenCV API
 #include <exception>
 
 // Convert rs2::frame to cv::Mat
 static cv::Mat frame_to_mat(const rs2::frame& f)
 {
-    using namespace cv;
     using namespace rs2;
 
     auto vf = f.as<video_frame>();
@@ -40,7 +37,6 @@ static cv::Mat frame_to_mat(const rs2::frame& f)
     {
         return Mat(Size(w, h), CV_32FC1, (void*)f.get_data(), Mat::AUTO_STEP);
     }
-
     throw std::runtime_error("Frame format is not supported yet!");
 }
 
@@ -49,6 +45,10 @@ static cv::Mat depth_frame_to_meters( const rs2::depth_frame & f )
 {
     cv::Mat dm = frame_to_mat(f);
     dm.convertTo( dm, CV_64F );
-    dm = dm * f.get_units();
+    dm = dm * f.get_units();// License: Apache 2.0. See LICENSE file in root directory.
+// Copyright(c) 2017 Intel Corporation. All Rights Reserved.
+
     return dm;
 }
+
+#endif // CV_HELPERS_HPP
