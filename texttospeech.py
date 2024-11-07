@@ -1,17 +1,20 @@
+from multiprocessing import Process
+
 import pyrealsense2
-import pyrealsense2 as rs #kameramodul
 import numpy as np #gjør bilde til narray
 import cv2 #bildbehandling + vise bilder
 from google.cloud import vision #google vision api
 import pyttsx3 #snakking
 
-
 import realsense_camera
 
 
-class TextToSpeech:
-    def __init__(self, rate: int = 150, volume: float = 0.9):
+class TextToSpeech(Process):
+    def __init__(self, camera: realsense_camera.PyRealSenseCamera, rate: int = 150, volume: float = 0.9):
         # Initialize the pyttsx3 engine
+        super().__init__()
+        self.camera: realsense_camera.PyRealSenseCamera = camera
+
         self.engine = pyttsx3.init()
 
         # Set the rate of speech
@@ -20,9 +23,18 @@ class TextToSpeech:
         # Set the volume
         self.engine.setProperty('volume', volume)
 
-    def read_text(self, frame):
-        #TODO: Split into getting the text and reading it out loud
-        #TODO: Type hint the frame parameter
+        self.texts = []
+
+    def run(self):
+        while True:
+            # listen for key press
+            key = cv2.waitKey(0)
+            if key == ord('r'):
+                self.get_text(camera.get_color_image())
+                self.speak()
+
+    def get_text(self, frame: pyrealsense2.video_frame):
+        """Gets the text from the frame using the Google Vision API."""
         client = vision.ImageAnnotatorClient()
 
         # Convert the frame to a byte array
@@ -34,14 +46,6 @@ class TextToSpeech:
 
         # Perform text detection
         response = client.text_detection(image=image)
-        texts = response.text_annotations
-        print("Texts:")
-
-        # read out loud
-        for text in texts[1:]:  # Skipping the first result as it's the full text
-            print(f'\n"{text.description}"')
-            self.engine.say(text.description)
-            self.engine.runAndWait()
 
         # Check for errors in the response
         if response.error.message:
@@ -50,44 +54,28 @@ class TextToSpeech:
                 "https://cloud.google.com/apis/design/errors".format(response.error.message)
             )
 
-    def run_blocking(self, camera: realsense_camera.PyRealSenseCamera):
-        # TODO: Implement a non-blocking version of this method
-        while True:
-            color_image = np.asanyarray(camera.get_color_image().get_data())
-            depth_image = np.asanyarray(camera.get_depth_image().get_data())
+        self.texts = response.text_annotations[1:]  # Skipping the first result as it's the full text
 
-            # listen for key press
-            key = cv2.waitKey(1)
-            if key == ord('r'):
-                # test = camera.get_color_image()
-                # read(test)
-                pass
+    def speak(self, texts = None):
+        """Reads the texts out loud, defaulting to the stored texts if none are provided."""
+        print("Texts:")
+        texts = texts if texts else self.texts
 
-            # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
-            depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+        # read out loud
+        for text in texts:
+            print(f'\n"{text.description}"')
+            self.engine.say(text)
+            self.engine.runAndWait()
 
-            depth_colormap_dim = depth_colormap.shape
-            color_colormap_dim = color_image.shape
 
-            # If depth and color resolutions are different, resize color image to match depth image for display
-            if depth_colormap_dim != color_colormap_dim:
-                resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]),
-                                                 interpolation=cv2.INTER_AREA)
-                images = np.hstack((resized_color_image, depth_colormap))
-            else:
-                images = np.hstack((color_image, depth_colormap))
-
-            # Show images
-            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('RealSense', images)
-            cv2.waitKey(1)
+def main(camera: realsense_camera.PyRealSenseCamera):
+    tts = TextToSpeech(camera)
+    tts.start()
 
 
 if __name__ == "__main__":
     camera = realsense_camera.PyRealSenseCamera()
-    tts = TextToSpeech()
-
-    tts.run_blocking(camera)
+    main(camera)
 
 
 """
