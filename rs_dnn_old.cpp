@@ -1,10 +1,10 @@
 // This example is derived from the ssd_mobilenet_object_detection opencv demo
 // and adapted to be used with Intel RealSense Cameras
 // Please see https://github.com/opencv/opencv/blob/master/LICENSE
-
+// g++ 
 #include <opencv4/opencv2/dnn.hpp>
 #include <librealsense2/rs.hpp>
-#include "../cv-helpers.hpp"
+#include "cv-helpers.hpp"
 
 const size_t inWidth      = 300;
 const size_t inHeight     = 300;
@@ -53,6 +53,8 @@ int main(int argc, char** argv) try
     const auto window_name = "Display Image";
     namedWindow(window_name, WINDOW_AUTOSIZE);
 
+    
+
     while (getWindowProperty(window_name, WND_PROP_AUTOSIZE) >= 0)
     {
         // Wait for the next set of frames
@@ -85,6 +87,10 @@ int main(int argc, char** argv) try
         depth_mat = depth_mat(crop);
 
         float confidenceThreshold = 0.8f;
+
+        // finn senter av bildet
+        int imageCenterX = color_mat.cols / 2;
+        
         for(int i = 0; i < detectionMat.rows; i++)
         {
             float confidence = detectionMat.at<float>(i, 2);
@@ -110,9 +116,16 @@ int main(int argc, char** argv) try
                 // use depth data in general
                 Scalar m = mean(depth_mat(object));
 
+                // finn horisontalt senter
+                int objectCenterX = (xLeftBottom + xRightTop) / 2;
+
+                // finn retning (høyre/venstre)
+                std::string direction = (objectCenterX < imageCenterX) ? "left" : "right";
+
+
                 std::ostringstream ss;
                 ss << classNames[objectClass] << " ";
-                ss << std::setprecision(2) << m[0] << " meters away";
+                ss << std::setprecision(2) << m[0] << " meters away on the " << direction << " side!";
                 String conf(ss.str());
 
                 rectangle(color_mat, object, Scalar(0, 255, 0));
