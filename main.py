@@ -4,12 +4,18 @@ import subprocess
 #from ultrasonic_sensor2 import UltrasonicSensor
 import random
 
+import capture
+import realsense_camera
+import self_calibrate
+
+
 #left_sensor = UltrasonicSensor(trig_pin=0, echo_pin=0)
 #right_sensor = UltrasonicSensor(trig_pin=0, echo_pin=0)
 
 def main():
     #setup
     #left_sensor.setup(), right_sensor.setup()
+    camera = realsense_camera.PyRealSenseCamera()
 
     try:
         while True:
@@ -21,8 +27,11 @@ def main():
             #print(f"[{headspace[0]}, {headspace[1]}] -> {avg_headspace} cm")
             #time.sleep(0.5)
             
-            subprocess.run(["python", "self_calibrate.py"])
-            subprocess.run(["python", "capture.py"])
+            # subprocess.run(["python", "self_calibrate.py"])
+            self_calibrate.main()
+
+            # subprocess.run(["python", "capture.py"])
+            capture.main(camera)
 
     except KeyboardInterrupt:
         #left_sensor.cleanup()

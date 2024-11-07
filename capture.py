@@ -2,9 +2,7 @@ import numpy as np
 import cv2
 import realsense_camera
 
-def main():
-    camera = realsense_camera.PyRealSenseCamera()
-
+def main(camera: realsense_camera.PyRealSenseCamera):
     while True:
         camera.wait_for_next_frame()
 
@@ -27,7 +25,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    camera = realsense_camera.PyRealSenseCamera()
+    main(camera)
 
 """
 # Configure depth and color streams
