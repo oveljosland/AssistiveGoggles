@@ -68,14 +68,15 @@ class TextToSpeech(Process):
             self.engine.runAndWait()
 
 
-def main(camera: realsense_camera.PyRealSenseCamera):
+def run(camera: realsense_camera.PyRealSenseCamera):
     tts = TextToSpeech(camera)
     tts.start()
 
 
+
 if __name__ == "__main__":
     camera = realsense_camera.PyRealSenseCamera()
-    main(camera)
+    run(camera)
 
 
 """

@@ -1,46 +1,31 @@
-import time
-import numpy as np
 import subprocess
-#from ultrasonic_sensor2 import UltrasonicSensor
-import random
 
 import capture
 import realsense_camera
-import self_calibrate
-
-
-#left_sensor = UltrasonicSensor(trig_pin=0, echo_pin=0)
-#right_sensor = UltrasonicSensor(trig_pin=0, echo_pin=0)
+import texttospeech
 
 def main():
-    #setup
-    #left_sensor.setup(), right_sensor.setup()
     camera = realsense_camera.PyRealSenseCamera()
+    # self_calibrate.main()
 
     try:
+        print("Starting text-to-speech...")
+        print("Press r to read the text aloud")
+        texttospeech.run(camera)
+
+        print("Starting capture...")
+        capture.display_color_and_depth_images(camera)
+
         while True:
-            #headspace = np.mean([left_sensor.get_distance(), right_sensor.get_distance()])
-
-            # test headspace measurements
-            #headspace = np.array([random.randint(0, 100), random.randint(0, 100)])
-            #avg_headspace = np.mean(headspace)
-            #print(f"[{headspace[0]}, {headspace[1]}] -> {avg_headspace} cm")
-            #time.sleep(0.5)
-            
-            # subprocess.run(["python", "self_calibrate.py"])
-            self_calibrate.main()
-
-            # subprocess.run(["python", "capture.py"])
-            capture.main(camera)
+            dnn_response = subprocess.run(["dnn/rs_dnn"], capture_output=True, text=True)
+            print(dnn_response.stdout)
+            print(dnn_response.stderr)
 
     except KeyboardInterrupt:
-        #left_sensor.cleanup()
-        #right_sensor.cleanup()
         print("Exiting...")
     
-    #finally:
-        #left_sensor.cleanup()
-        #right_sensor.cleanup()
+    finally:
+        pass
 
 if __name__ == "__main__":
     main()
