@@ -1,3 +1,9 @@
 {
-    "cmake.sourceDirectory": "/home/ove/Projects/AssistiveGoggles/depth-filter"
+    "cmake.sourceDirectory": "/home/ove/Projects/AssistiveGoggles/depth-filter",
+    "files.associations": {
+        "functional": "cpp",
+        "new": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp"
+    }
 }
