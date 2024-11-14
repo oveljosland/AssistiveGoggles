@@ -1,12 +1,4 @@
 """
-OpenGL Pointcloud viewer with http://pyglet.org
-
-Usage:
-------
-Mouse:
-    Drag with left button to rotate around pivot (thick small axes),
-    with right button to translate and the wheel to zoom.
-
 Keyboard:
     [p]     Pause
     [r]     Reset View
@@ -19,16 +11,6 @@ Keyboard:
     [s]     Save PNG (./out.png)
     [e]     Export points to ply (./out.ply)
     [q/ESC] Quit
-
-Notes:
-------
-Using deprecated OpenGL (FFP lighting, matrix stack...) however, draw calls 
-are kept low with pyglet.graphics.* which uses glDrawArrays internally.
-
-Normals calculation is done with numpy on CPU which is rather slow, should really
-be done with shaders but was omitted for several reasons - brevity, for lowering
-dependencies (pyglet doesn't ship with shader support & recommends pyshaders)
-and for reference.
 """
 
 import math
@@ -64,12 +46,12 @@ class AppState:
         self.distance = 2
         self.mouse_btns = [False, False, False]
         self.paused = False
-        self.decimate = 0
-        self.scale = True
+        self.decimate = 2
+        self.scale = False
         self.attenuation = False
-        self.color = True
+        self.color = False
         self.lighting = False
-        self.postprocessing = False
+        self.postprocessing = True
 
     def reset(self):
         self.pitch, self.yaw, self.distance = 0, 0, 2

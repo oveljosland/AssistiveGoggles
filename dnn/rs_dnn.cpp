@@ -2,9 +2,10 @@
 // and adapted to be used with Intel RealSense Cameras
 // Please see https://github.com/opencv/opencv/blob/master/LICENSE
 
+#include <opencv4/opencv2/opencv.hpp>
 #include <opencv4/opencv2/dnn.hpp>
 #include <librealsense2/rs.hpp>
-#include "../cv-helpers.hpp"
+#include "cv-helpers.hpp"
 
 const size_t inWidth      = 300;
 const size_t inHeight     = 300;
@@ -104,10 +105,7 @@ int main(int argc, char** argv) try
 
                 object = object  & Rect(0, 0, depth_mat.cols, depth_mat.rows);
 
-                // Calculate mean depth inside the detection region
-                // This is a very naive way to estimate objects depth
-                // but it is intended to demonstrate how one might 
-                // use depth data in general
+                // finner avstand ved å ta gj.snitt av depth-verdier innenfor detectionområde.
                 Scalar m = mean(depth_mat(object));
 
                 std::ostringstream ss;
