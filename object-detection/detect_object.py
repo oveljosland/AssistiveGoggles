@@ -35,7 +35,7 @@ time.sleep(2)  # la kamera 'varme opp'
 try:
     while True:
         # hent frames
-        frames = pipeline.wait_for_frames()
+        frames = pipeline.wait_for_frames(timeout_ms=10000)
         color_frame = frames.get_color_frame()
         if not color_frame:
             continue
