@@ -4,73 +4,89 @@ import time
 # Set up the GPIO mode
 GPIO.setmode(GPIO.BCM)
 
-# Define the GPIO pins for the first sensor
-TRIG1 = 23         # GPIO 23 (Pin 16)
-ECHO1 = 24         # GPIO 24 (Pin 18)
+# Define GPIO pins for Sensor 1
+TRIG_1 = 23         # GPIO 23 (Pin 16)
+ECHO_1 = 24         # GPIO 24 (Pin 18)
+MOTOR_PIN_1 = 18    # GPIO pin for the motor control of Sensor 1
 
-# Define the GPIO pins for the second sensor
-TRIG2 = 27         # GPIO 27 (Pin 13)
-ECHO2 = 22         # GPIO 22 (Pin 15)
-
-# Define the motor pin
-MOTOR_PIN = 18     # GPIO pin for the motor control
+# Define GPIO pins for Sensor 2
+TRIG_2 = 27         # GPIO 27 (Pin 13)
+ECHO_2 = 22         # GPIO 22 (Pin 15)
+MOTOR_PIN_2 = 25    # GPIO pin for the motor control of Sensor 2
 
 # Set up the pins as input and output
-GPIO.setup(TRIG1, GPIO.OUT)
-GPIO.setup(ECHO1, GPIO.IN)
-GPIO.setup(TRIG2, GPIO.OUT)
-GPIO.setup(ECHO2, GPIO.IN)
-GPIO.setup(MOTOR_PIN, GPIO.OUT)
+GPIO.setup(TRIG_1, GPIO.OUT)
+GPIO.setup(ECHO_1, GPIO.IN)
+GPIO.setup(MOTOR_PIN_1, GPIO.OUT)
 
-def measure_distance(trig, echo):
-    # Ensure the trigger pin is low
-    GPIO.output(trig, False)
-    time.sleep(0.1)  # Short delay to allow for separation between triggers
+GPIO.setup(TRIG_2, GPIO.OUT)
+GPIO.setup(ECHO_2, GPIO.IN)
+GPIO.setup(MOTOR_PIN_2, GPIO.OUT)
+
+# Constants for vibration delay control
+MAX_DISTANCE = 25  # Maximum distance to start vibrating in cm
+MAX_DELAY = 1000   # Maximum delay in ms (when at max distance)
+MIN_DELAY = 100    # Minimum delay in ms (when very close)
+
+def measure_distance(TRIG, ECHO):
+    """Measure distance using the ultrasonic sensor."""
+    GPIO.output(TRIG, False)
+    time.sleep(0.05)  # Allow the sensor to settle
 
     # Send a 10us pulse to the trigger pin
-    GPIO.output(trig, True)
-    time.sleep(0.00001)  # 10us pulse
-    GPIO.output(trig, False)
+    GPIO.output(TRIG, True)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, False)
 
-    # Wait for the echo pin to go high (start of the echo pulse)
-    while GPIO.input(echo) == 0:
+    # Measure the duration of the echo pulse
+    while GPIO.input(ECHO) == 0:
         pulse_start = time.time()
 
-    # Wait for the echo pin to go low (end of the echo pulse)
-    while GPIO.input(echo) == 1:
+    while GPIO.input(ECHO) == 1:
         pulse_end = time.time()
 
-    # Calculate the duration of the pulse
     pulse_duration = pulse_end - pulse_start
+    distance = pulse_duration * 17150  # Convert time to distance
+    return round(distance, 2)
 
-    # Calculate the distance (sound speed in air is 34300 cm/s)
-    distance = pulse_duration * 17150  # 17150 is half of 34300 (round trip time)
+def get_vibration_delay(distance):
+    """Calculate the vibration delay inversely proportional to distance."""
+    if distance > MAX_DISTANCE:
+        return MAX_DELAY
+    else:
+        scale = (MAX_DISTANCE - distance) / MAX_DISTANCE
+        delay = MAX_DELAY - (scale * (MAX_DELAY - MIN_DELAY))
+        return max(MIN_DELAY, delay)
 
-    # Limit the distance to two decimal places
-    distance = round(distance, 2)
-
-    return distance
-
-def activate_motor(duration=3.5):
-    """Activate the motor for a given duration in seconds."""
-    GPIO.output(MOTOR_PIN, GPIO.HIGH)  # Turn on the motor
+def activate_motor(motor_pin, duration=0.1):
+    """Activate the motor for a short pulse duration."""
+    GPIO.output(motor_pin, GPIO.HIGH)  # Turn on the motor
     time.sleep(duration)               # Keep it on for the duration
-    GPIO.output(MOTOR_PIN, GPIO.LOW)   # Turn off the motor
+    GPIO.output(motor_pin, GPIO.LOW)   # Turn off the motor
 
 try:
     while True:
-        # Measure distance from Sensor 1
-        dist1 = measure_distance(TRIG1, ECHO1)
-        print(f"Distance from Sensor 1: {dist1} cm")
+        # Measure distance for Sensor 1
+        dist_1 = measure_distance(TRIG_1, ECHO_1)
+        print(f"Sensor 1 Distance: {dist_1} cm")
 
-        # Measure distance from Sensor 2
-        dist2 = measure_distance(TRIG2, ECHO2)
-        print(f"Distance from Sensor 2: {dist2} cm")
+        # Check and activate motor for Sensor 1 if within range
+        if dist_1 <= MAX_DISTANCE:
+            delay_1 = get_vibration_delay(dist_1)
+            print(f"Sensor 1 Vibration Delay: {delay_1} ms")
+            activate_motor(MOTOR_PIN_1, duration=0.1)
+            time.sleep(delay_1 / 1000)  # Wait for calculated delay
 
-        # Check if either distance is less than 10 cm and activate motor
-        if dist1 < 10 or dist2 < 10:
-            print("DANGER!")
-            activate_motor()  # Activate motor vibration
+        # Measure distance for Sensor 2
+        dist_2 = measure_distance(TRIG_2, ECHO_2)
+        print(f"Sensor 2 Distance: {dist_2} cm")
+
+        # Check and activate motor for Sensor 2 if within range
+        if dist_2 <= MAX_DISTANCE:
+            delay_2 = get_vibration_delay(dist_2)
+            print(f"Sensor 2 Vibration Delay: {delay_2} ms")
+            activate_motor(MOTOR_PIN_2, duration=0.1)
+            time.sleep(delay_2 / 1000)  # Wait for calculated delay
 
 except KeyboardInterrupt:
     print("Measurement stopped by user")
