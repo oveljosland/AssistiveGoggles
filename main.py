@@ -14,7 +14,7 @@ def main():
         texttospeech.run(camera)
 
         print("Starting capture...")
-        capture.display_color_and_depth_images(camera)
+        capture.display_color_and_depth_image_continuous(camera)
 
         while True:
             dnn_response = subprocess.run(["dnn/rs_dnn"], capture_output=True, text=True)
