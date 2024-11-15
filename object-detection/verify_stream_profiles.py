@@ -3,6 +3,7 @@ import pyrealsense2 as rs
 pipeline = rs.pipeline()
 config = rs.config()
 try:
+    # Start a temporary pipeline wrapper to query available configurations
     pipeline_wrapper = rs.pipeline_wrapper(pipeline)
     pipeline_profile = config.resolve(pipeline_wrapper)
 
@@ -13,5 +14,3 @@ try:
             s.as_video_stream_profile().height(), s.fps()))
 except Exception as e:
     print("Error: ", e)
-finally:
-    pipeline.stop()
