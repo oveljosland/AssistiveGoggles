@@ -1,0 +1,1 @@
+python detect_object.py -p caffe/MobileNetSSD_deploy.prototxt -m caffe/MobileNetSSD_deploy.caffemodel

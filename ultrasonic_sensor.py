@@ -14,7 +14,7 @@ import time
 
 GPIO.setmode(GPIO.BCM)  # Set GPIO pin numbering
 GPIO.setup(trig_pin, GPIO.OUT)
-GPIO.setup(led_pin, GPIO.OUT)
+GPIO.setup(led_pin, GPIO.OUT)      # Break on 'q' key press
 GPIO.setup(echo_pin, GPIO.IN)
 
 def uss_setup():
