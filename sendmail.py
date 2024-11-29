@@ -1,7 +1,7 @@
 import socket
 
 # Server details
-server_ip = "10.22.103.115"  # Replace with the server's IP address
+server_ip = "10.22.100.123"  # Replace with the server's IP address
 server_port = 5003  # Port number for the server
 
 # Set up the socket for communication
