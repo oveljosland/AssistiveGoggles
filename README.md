@@ -1,5 +1,5 @@
 # nVision
-This repository contains the code for the Assistive Goggles project.
+This repository contains the code for the NVision project.
 
 The project is a wearable device that helps visually impaired people navigate their surroundings.
 The device uses a camera to capture images of the user's surroundings, and then processes the images to identify objects and obstacles. The device then provides audio feedback to the user to help them navigate safely.
