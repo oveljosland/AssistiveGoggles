@@ -20,4 +20,4 @@ Furthermore, it will be necessary to install the following dependencies using th
 - OpenCV installed on the Raspberry Pi
 
 ## Running the code
-To run the code, simply run the main.py file.
+To run the code, simply run the main.py file on the Raspberry Pi.
