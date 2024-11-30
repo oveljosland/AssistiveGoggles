@@ -40,3 +40,9 @@ def sjekkknapp():
             sendmail.send(f"Posisjon: Breddegrader {breddegrader}, Lengdegrader {lengdegrader}")
             sendt = True
             time_since_last_impact = time.time()
+
+
+if __name__ == "__main__":
+    while True:
+        sjekkknapp()
+        time.sleep(0.1)

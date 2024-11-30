@@ -83,4 +83,9 @@ def monitor_sensors():
         print(f"Sensor 2 Vibration Delay {delay_2} ms")
         activate_motor(MOTOR_PIN_2, duration=0.1)
         time.sleep(delay_2 / 1000) # Venter på den kalkulerte delayen
-    
+
+
+if __name__ == "__main__":
+    while True:
+        monitor_sensors()
+        time.sleep(0.1)

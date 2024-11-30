@@ -31,3 +31,9 @@ def detect_impact():
             sendmail.send('Det har blitt opfattet ett fall på  ' + str(accel_max) + 'm/s^2 Posisjon: Breddegrader ' + breddegrader + 'Lengdegrader ' + lengdegrader)
             sendt = True
             time_since_last_impact = time.time()
+
+
+if __name__ == "__main__":
+    while True:
+        detect_impact()
+        time.sleep(0.1)
