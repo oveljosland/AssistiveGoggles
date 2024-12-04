@@ -2,8 +2,7 @@ import socket
 import requests
 import os
 
-# Set the environment variable for testing
-os.environ["MAILGUN_API_KEY"] = "540ee7a6997fc805569756e9c607af46-784975b6-ef4347c1"
+
 
 def send_simple_message(melding):
   	return requests.post(
